@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "./App.css";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://face-recognition-attendance-system-backend-production.up.railway.app/";
 
 /* ============================================================
    SVG ICON COMPONENTS
