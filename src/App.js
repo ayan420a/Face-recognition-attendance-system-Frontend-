@@ -1103,9 +1103,6 @@ function Dashboard({ user, onLogout }) {
   );
 }
 
-<<<<<<< HEAD
-export default App;
-=======
 /* ============================================================
    ROOT APP — Handles auth state
    ============================================================ */
@@ -1164,4 +1161,4 @@ function App() {
 }
 
 export default App;
->>>>>>> 37e5345 (feat: use REACT_APP_API_BASE env var for backend URL)
+
