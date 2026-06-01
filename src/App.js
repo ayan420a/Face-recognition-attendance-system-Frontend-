@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "./App.css";
 
-const API_BASE = (process.env.REACT_APP_API_BASE || "https://face-recognition-attendance-system-backend-production-cabd.up.railway.app").replace(/\/+$/, "");
+const API_BASE = (process.env.REACT_APP_API_BASE || "http://localhost:5000").replace(/\/+$/, "");
 
 /* ============================================================
    SVG ICON COMPONENTS
@@ -180,174 +180,7 @@ const Icons = {
   ),
 };
 
-/* ============================================================
-   AUTH SCREEN COMPONENT
-   ============================================================ */
 
-function AuthScreen({ onLogin }) {
-  const [isSignup, setIsSignup] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!username.trim() || !password.trim()) {
-      setError("Username and password are required");
-      return;
-    }
-    if (isSignup && !fullName.trim()) {
-      setError("Full name is required");
-      return;
-    }
-    if (password.length < 4) {
-      setError("Password must be at least 4 characters");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const endpoint = isSignup ? "/api/auth/signup" : "/api/auth/login";
-      const body = isSignup
-        ? { username: username.trim(), password, fullName: fullName.trim() }
-        : { username: username.trim(), password };
-
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || `Error ${res.status}`);
-      }
-
-      const data = await res.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("fullName", data.fullName);
-      onLogin(data);
-    } catch (err) {
-      setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="auth-screen">
-      <div className="auth-ambient-1" />
-      <div className="auth-ambient-2" />
-
-      <div className="auth-container">
-        <div className="auth-header">
-          <img src="/logo.png" alt="FaceID Pro" className="auth-logo" />
-          <h1 className="auth-title">FaceID Pro</h1>
-          <p className="auth-subtitle">Smart Attendance System</p>
-        </div>
-
-        <div className="auth-card">
-          <div className="auth-tabs">
-            <button
-              className={`auth-tab ${!isSignup ? "active" : ""}`}
-              onClick={() => { setIsSignup(false); setError(""); }}
-              type="button"
-            >
-              Sign In
-            </button>
-            <button
-              className={`auth-tab ${isSignup ? "active" : ""}`}
-              onClick={() => { setIsSignup(true); setError(""); }}
-              type="button"
-            >
-              Create Account
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            {isSignup && (
-              <div className="auth-field">
-                <label className="auth-label">
-                  <Icons.User /> Full Name
-                </label>
-                <input
-                  type="text"
-                  className="auth-input"
-                  placeholder="Enter your full name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  autoComplete="name"
-                />
-              </div>
-            )}
-
-            <div className="auth-field">
-              <label className="auth-label">
-                <Icons.Mail /> Username
-              </label>
-              <input
-                type="text"
-                className="auth-input"
-                placeholder="Enter username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-              />
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-label">
-                <Icons.Lock /> Password
-              </label>
-              <input
-                type="password"
-                className="auth-input"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete={isSignup ? "new-password" : "current-password"}
-              />
-            </div>
-
-            {error && (
-              <div className="auth-error">
-                <Icons.AlertCircle />
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="btn-primary auth-submit"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner" />
-                  {isSignup ? "Creating Account..." : "Signing In..."}
-                </>
-              ) : (
-                <>
-                  <span className="btn-icon"><Icons.Shield /></span>
-                  {isSignup ? "Create Account" : "Sign In"}
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        <p className="auth-footer-text">
-          Secured with face recognition & liveness detection
-        </p>
-      </div>
-    </div>
-  );
-}
 
 /* ============================================================
    MAIN APP (Dashboard)
@@ -387,11 +220,7 @@ function Dashboard({ user, onLogout }) {
   // confirm dialogs
   const [confirmAction, setConfirmAction] = useState(null);
 
-  const token = localStorage.getItem("token");
-
-  const authHeaders = useCallback(() => ({
-    Authorization: `Bearer ${token}`,
-  }), [token]);
+  const authHeaders = useCallback(() => ({}), []);
 
   useEffect(() => {
     loadAttendance();
@@ -728,7 +557,7 @@ function Dashboard({ user, onLogout }) {
             </div>
           </div>
 
-          {/* Admin & Logout */}
+          {/* Admin & User Badge */}
           <button
             className={`btn-secondary navbar-admin-btn ${showAdmin ? 'active-admin' : ''}`}
             onClick={toggleAdmin}
@@ -737,10 +566,10 @@ function Dashboard({ user, onLogout }) {
             <span className="btn-icon"><Icons.Settings /></span>
             Admin
           </button>
-          <button className="btn-secondary navbar-user-btn" onClick={onLogout} title="Logout">
-            <span className="btn-icon"><Icons.LogOut /></span>
+          <div className="btn-secondary navbar-user-btn" style={{ cursor: "default" }}>
+            <span className="btn-icon"><Icons.User /></span>
             <span className="navbar-username">{user?.fullName || user?.username}</span>
-          </button>
+          </div>
         </div>
       </nav>
 
@@ -1116,56 +945,7 @@ function Dashboard({ user, onLogout }) {
    ============================================================ */
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetch(`${API_BASE}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Invalid token");
-          return res.json();
-        })
-        .then((data) => setUser(data))
-        .catch(() => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("username");
-          localStorage.removeItem("fullName");
-        })
-        .finally(() => setChecking(false));
-    } else {
-      setChecking(false);
-    }
-  }, []);
-
-  const handleLogin = (data) => {
-    setUser({ username: data.username, fullName: data.fullName });
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("fullName");
-    setUser(null);
-  };
-
-  if (checking) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner-large" />
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <AuthScreen onLogin={handleLogin} />;
-  }
-
-  return <Dashboard user={user} onLogout={handleLogout} />;
+  return <Dashboard user={{ username: "admin", fullName: "Administrator" }} />;
 }
 
 export default App;
