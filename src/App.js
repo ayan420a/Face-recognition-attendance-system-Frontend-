@@ -408,7 +408,9 @@ function Dashboard({ user, onLogout }) {
     try {
       setLoadingAttendance(true);
       setAttendanceError("");
-      const res = await fetch(`${API_BASE}/api/attendance`);
+      const res = await fetch(`${API_BASE}/api/attendance`, {
+        headers: authHeaders(),
+      });
       if (!res.ok) throw new Error(`Status ${res.status}`);
       const data = await res.json();
       setAttendance(data || []);
@@ -422,7 +424,9 @@ function Dashboard({ user, onLogout }) {
   // ====== API: status ======
   const loadStatus = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/status`);
+      const res = await fetch(`${API_BASE}/api/status`, {
+        headers: authHeaders(),
+      });
       if (!res.ok) throw new Error(`Status ${res.status}`);
       const data = await res.json();
       setKnownFacesCount(data.known_faces || 0);
@@ -456,6 +460,7 @@ function Dashboard({ user, onLogout }) {
 
       const res = await fetch(`${API_BASE}/api/faces/register`, {
         method: "POST",
+        headers: authHeaders(),
         body: formData,
       });
       if (!res.ok) {
@@ -536,6 +541,7 @@ function Dashboard({ user, onLogout }) {
 
       const res = await fetch(`${API_BASE}/api/recognize`, {
         method: "POST",
+        headers: authHeaders(),
         body: formData,
       });
       if (!res.ok) throw new Error(await res.text() || `Status ${res.status}`);
@@ -566,7 +572,9 @@ function Dashboard({ user, onLogout }) {
   // ====== Export ======
   const handleExport = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/attendance/export`);
+      const res = await fetch(`${API_BASE}/api/attendance/export`, {
+        headers: authHeaders(),
+      });
       if (!res.ok) throw new Error(`Status ${res.status}`);
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
